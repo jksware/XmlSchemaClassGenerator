@@ -14,8 +14,11 @@ namespace XmlSchemaClassGenerator
 {
     public static class CodeUtilities
     {
+        // Match multiple uppercase letters
+        private static readonly Regex UpperCaseRegex = new(@"[A-Z]{2,}");
+
         // Match non-letter followed by letter
-        private static readonly Regex PascalCaseRegex = new(@"(([^\p{L}]\p{L})|([^A-Z][A-Z]))[A-Z]*", RegexOptions.Compiled);
+        private static readonly Regex PascalCaseRegex = new(@"[^\p{L}]\p{L}", RegexOptions.Compiled);
 
         // Uppercases first letter and all letters following non-letters.
         // Examples: testcase -> Testcase, html5element -> Html5Element, test_case -> Test_Case
@@ -24,15 +27,14 @@ namespace XmlSchemaClassGenerator
             if (string.IsNullOrEmpty(s))
                 return s;
 
+            s = UpperCaseRegex.Replace(
+                s, 
+                m => m.Value[0] + m.Value.Substring(1).ToLowerInvariant()
+            );
+
             return char.ToUpperInvariant(s[0]) + PascalCaseRegex.Replace(
                 s.Substring(1),
-                m =>
-                {
-                    string remaining = string.Empty;
-                    if (m.Value.Length >= 2)
-                        remaining = m.Value.Substring(2).ToLowerInvariant();
-                    return m.Value[0] + char.ToUpperInvariant(m.Value[1]).ToString() + remaining;
-                }
+                m => m.Value[0] + char.ToUpperInvariant(m.Value[1]).ToString()
             );
         }
 
