@@ -324,6 +324,12 @@ namespace XmlSchemaClassGenerator
             set { _configuration.MapUnionToWidestCommonType = value; }
         }
 
+        public bool ResolveExternalUris
+        {
+            get { return _configuration.ResolveExternalUris;  }
+            set { _configuration.ResolveExternalUris = value; }
+        }
+
         static Generator()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -335,7 +341,7 @@ namespace XmlSchemaClassGenerator
             var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
             var readers = files.Select(f => XmlReader.Create(f, settings));
 
-            set.XmlResolver = new XmlUrlResolver();
+            set.XmlResolver = ResolveExternalUris ? new XmlUrlResolver() : null;
             set.ValidationEventHandler += (s, e) =>
             {
                 var ex = e.Exception as Exception;
