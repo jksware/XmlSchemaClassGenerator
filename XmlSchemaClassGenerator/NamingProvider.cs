@@ -62,7 +62,7 @@
         /// <returns>Name of the enum member</returns>
         public virtual string EnumMemberNameFromValue(string enumName, string value, XmlSchemaEnumerationFacet xmlFacet)
         {
-            return value.ToTitleCase(_namingScheme).ToNormalizedEnumName();
+            return value.ToNormalizedEnumName();
         }
 
         /// <summary>
