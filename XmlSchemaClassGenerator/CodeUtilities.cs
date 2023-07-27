@@ -15,12 +15,26 @@ namespace XmlSchemaClassGenerator
     public static class CodeUtilities
     {
         // Match non-letter followed by letter
-        private static readonly Regex PascalCaseRegex = new(@"[^\p{L}]\p{L}", RegexOptions.Compiled);
+        private static readonly Regex PascalCaseRegex = new(@"(([^\p{L}]\p{L})|([^A-Z][A-Z]))[A-Z]*", RegexOptions.Compiled);
 
         // Uppercases first letter and all letters following non-letters.
         // Examples: testcase -> Testcase, html5element -> Html5Element, test_case -> Test_Case
-        public static string ToPascalCase(this string s) => string.IsNullOrEmpty(s) ? s
-            : char.ToUpperInvariant(s[0]) + PascalCaseRegex.Replace(s.Substring(1), m => m.Value[0] + char.ToUpperInvariant(m.Value[1]).ToString());
+        public static string ToPascalCase(this string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return s;
+
+            return char.ToUpperInvariant(s[0]) + PascalCaseRegex.Replace(
+                s.Substring(1),
+                m =>
+                {
+                    string remaining = string.Empty;
+                    if (m.Value.Length >= 2)
+                        remaining = m.Value.Substring(2).ToLowerInvariant();
+                    return m.Value[0] + char.ToUpperInvariant(m.Value[1]).ToString() + remaining;
+                }
+            );
+        }
 
         public static string ToCamelCase(this string s) => string.IsNullOrEmpty(s) ? s
             : char.ToLowerInvariant(s[0]) + s.Substring(1);
