@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 
 namespace XmlSchemaClassGenerator;
@@ -13,6 +14,16 @@ public class NormalizingXmlResolver(string forceUriScheme) : XmlUrlResolver()
 
     public override Uri ResolveUri(Uri baseUri, string relativeUri)
     {
+        if (forceUriScheme == "file")
+        {
+            string basePath = baseUri.IsFile ? Path.GetDirectoryName(baseUri.LocalPath) : null;
+            var combined = Path.Combine(
+                basePath ?? string.Empty,
+                Path.GetFileName(relativeUri.ToString())
+            );
+            return new Uri(combined);
+        }
+
         var resolvedUri = base.ResolveUri(baseUri, relativeUri);
         var r = NormalizeUri(baseUri, resolvedUri);
         return r;
@@ -24,7 +35,7 @@ public class NormalizingXmlResolver(string forceUriScheme) : XmlUrlResolver()
 
         switch (forceUriScheme)
         {
-            case "none": return resolvedUri;
+            case "none": return resolvedUri;                
             case "same":
                 {
                     newScheme = baseUri.Scheme;
